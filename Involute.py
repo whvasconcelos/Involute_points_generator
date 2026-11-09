@@ -35,12 +35,16 @@ App.getDocument('Unnamed').getObject('Sketch').MapMode = 'FlatFace'
 
 # Generating the points
 points=[]
+counter=0
 for a in alpha_values:
     file=open('commands.txt','a')
     cord=([cord_x(a),cord_y(a)])
     file.write(f'''App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.Point(App.Vector({cord_x(a):.6f},{cord_y(a):.6f},0)), False)\n''')
+App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('DistanceX',{counter},1,{cord_x(a):.6f}))
+App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('DistanceY',{counter},1,{cord_y(a):.6f}))\n''')
     file.close
     points.append(cord)
+    counter=counter+1
 
 # Generating the lines
 for value in np.arange(0,num_pts):
