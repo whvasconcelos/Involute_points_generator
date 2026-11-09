@@ -9,7 +9,6 @@ delta_radius=float(input("Delta to external radius: ")) #5 as an example
 num_pts=int(input("Number of points to create: ")) #20 as an example
 external_radius=base_radius+delta_radius
 angle=np.acos(base_radius/external_radius)
-#print(angulo_abertura)
 
 def cord_x(alpha):
     return -base_radius*np.sqrt(1+alpha**2)*np.sin(alpha-np.atan(alpha))
@@ -18,8 +17,8 @@ def cord_y(alpha):
     return base_radius*(1+(np.sqrt(1+alpha**2)*np.cos(alpha-np.atan(alpha))-1))
 
 
-alpha_values=[(angle/num_pts)*(np.arange(0,num_pts)+1)]
-alpha_values=np.append(alpha_values,0)
+alpha_values=(angle/num_pts)*(np.arange(0,num_pts)+1)
+alpha_values=np.insert(alpha_values,0,0)
 #print(alpha_values)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,6 +33,7 @@ App.getDocument('Unnamed').getObject('Sketch').AttachmentSupport = (App.getDocum
 App.getDocument('Unnamed').getObject('Sketch').MapMode = 'FlatFace'
 ''')
 
+# Generating the points
 points=[]
 for a in alpha_values:
     file=open('commands.txt','a')
@@ -41,6 +41,12 @@ for a in alpha_values:
     file.write(f'''App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.Point(App.Vector({cord_x(a):.6f},{cord_y(a):.6f},0)), False)\n''')
     file.close
     points.append(cord)
+
+# Generating the lines
+for value in np.arange(0,num_pts):
+    file=open('commands.txt','a')
+    file.write(f'''App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.LineSegment(App.Vector({points[value][0]:.6f},{points[value][1]:.6f},0),App.Vector({points[value+1][0]:.6f},{points[value+1][1]:.6f},0)),False)\n''')
+    file.close
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
 #Generating a csv table with cordinates
