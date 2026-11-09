@@ -45,7 +45,9 @@ for a in alpha_values:
 # Generating the lines
 for value in np.arange(0,num_pts):
     file=open('commands.txt','a')
-    file.write(f'''App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.LineSegment(App.Vector({points[value][0]:.6f},{points[value][1]:.6f},0),App.Vector({points[value+1][0]:.6f},{points[value+1][1]:.6f},0)),False)\n''')
+    file.write(f'''App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.LineSegment(App.Vector({points[value][0]:.6f},{points[value][1]:.6f},0),App.Vector({points[value+1][0]:.6f},{points[value+1][1]:.6f},0)),False)
+App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident',{value+num_pts+1},1,{value},1)) 
+App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident',{value+num_pts+1},2,{value+1},1))\n''')
     file.close
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
