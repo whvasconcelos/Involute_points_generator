@@ -1,0 +1,47 @@
+# Macro Begin: C:\Users\whvas\Desktop\Projetos\Engrenagem\lines.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+import PartDesign
+import PartDesignGui
+import Sketcher
+import numpy as np
+import math
+from pathlib import Path
+
+App.getDocument('Unnamed').getObject('Body').newObject('Sketcher::SketchObject','Sketch')
+App.getDocument('Unnamed').getObject('Sketch').AttachmentSupport = (App.getDocument('Unnamed').getObject('Origin'),['XY_Plane'])
+App.getDocument('Unnamed').getObject('Sketch').MapMode = 'FlatFace'
+
+base_radius=20
+delta_radius=5
+num_pts=20
+external_radius=base_radius+delta_radius
+angle=math.acos(base_radius/external_radius)
+
+def cord_x(alpha):
+    return -base_radius*math.sqrt(1+alpha**2)*math.sin(alpha-math.atan(alpha))
+
+def cord_y(alpha):
+    return base_radius*(1+(math.sqrt(1+alpha**2)*math.cos(alpha-math.atan(alpha))-1))
+
+
+alpha_values=(angle/num_pts)*(np.arange(0,num_pts)+1)
+alpha_values=np.insert(alpha_values,0,0)
+
+#--------------------------------------------------------------------------------------------------
+# Generating the points
+points=[]
+counter=0
+for a in alpha_values:
+    cord=([cord_x(a),cord_y(a)])
+    App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.Point(App.Vector(cord_x(a),cord_y(a),0)), False)
+    App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('DistanceX',counter,1,cord_x(a)))
+    App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('DistanceY',counter,1,cord_y(a)))
+    points.append(cord)
+    counter=counter+1
+#--------------------------------------------------------------------------------------------------
+
+# Generating the lines
+for value in np.arange(0,num_pts):
+    App.getDocument('Unnamed').getObject('Sketch').addGeometry(Part.LineSegment(App.Vector(points[value][0],points[value][1],0),App.Vector(points[value+1][0],points[value+1][1],0)),False)
+    App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident',value+num_pts+1,1,value,1)) 
+    App.getDocument('Unnamed').getObject('Sketch').addConstraint(Sketcher.Constraint('Coincident',value+num_pts+1,2,value+1,1))
